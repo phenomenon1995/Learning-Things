@@ -28,6 +28,8 @@ struct ContentView: View {
     @State private var gameOver: Bool = false
     @State private var scoreTitle: String = ""
     @State private var userScore: Int = 0
+    @State private var tappedFlag: Int  = 0
+    @State private var rotationAmount: Double = 0.0
     
     var body: some View {
         ZStack{
@@ -55,7 +57,14 @@ struct ContentView: View {
                         } label: {
                            FlagView(country: countries[number])
                         }
+                        .opacity(tappedFlag != number && showingScore ? 0.25 : 1)
+                        .scaleEffect(tappedFlag != number && showingScore ? 0.3 : 1)
+                        .rotation3DEffect(.degrees(tappedFlag == number ? rotationAmount : 0.0),
+                                          axis: (x: 0.0, y: 1.0, z: 0.0)
+                                          )
                     }
+                    
+ 
                 }
                 .frame(maxWidth: /*@START_MENU_TOKEN@*/.infinity/*@END_MENU_TOKEN@*/)
                 .padding(.vertical, 20)
@@ -95,14 +104,21 @@ struct ContentView: View {
     }
     
     func flagTapped(_ number: Int) {
-        showingScore = true
-        selectedAnswer = number
+        withAnimation{
+            rotationAmount += 360
+            showingScore = true
+            selectedAnswer = number
+            tappedFlag = number
+        }
+        
         if selectedAnswer == correctAnswer {
             scoreTitle = "Correct"
             userScore += 1
         } else {
             scoreTitle = "Incorrect"
         }
+        
+        
         
     }
     func askQuestion(){
