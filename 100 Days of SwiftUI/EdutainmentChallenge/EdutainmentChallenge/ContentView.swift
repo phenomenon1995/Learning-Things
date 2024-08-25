@@ -55,15 +55,7 @@ struct ContentView: View {
     private var correctAnswer: Int {
         return operand1 * operand2
     }
-    private var possibleAnswers: Array<Int> {
-        var options: Array<Int> = []
-        options.append(correctAnswer)
-        for _ in 0..<3{
-            let randomAnswer = (Int.random(in: 1...15) * Int.random(in: 1...15))
-            options.append(randomAnswer)
-        }
-        return options.shuffled()
-    }
+    @State private var possibleAnswers: Array<Int> = []
     
     var body: some View {
         NavigationStack{
@@ -81,7 +73,7 @@ struct ContentView: View {
                         ForEach(possibleAnswers, id: \.self){ answer in
                             Button{
                                 userAnswer = answer
-                                nextQuestion()
+                                checkAnswer()
                                 showingResult = true
                                 withAnimation{
                                     scaleAmount = 0.5
@@ -91,13 +83,8 @@ struct ContentView: View {
                                     .fontWeight(.bold)
                             }
                             .frame(maxWidth: .infinity, maxHeight: 100)
-                            .background(.blue)
-                            .clipShape(.rect(cornerRadius: 10))
+                            .background(showingResult ? (correctAnswer == answer ? .green : .red) : .blue)                            .clipShape(.rect(cornerRadius: 10))
                             .foregroundColor(.white)
-                            .scaleEffect(scaleAmount)
-                            
-                            
-                            
                         }
                     }
                     Spacer()
@@ -108,8 +95,7 @@ struct ContentView: View {
                             gameStarted = false
                         } else {
                             currentQuestion += 1
-                            operand1 = Int.random(in: 2...difficulty)
-                            operand2 = Int.random(in: 2...difficulty)
+                            nextQuestion()
                             scaleAmount = 1
                         }
                         
@@ -129,7 +115,6 @@ struct ContentView: View {
             } else {
                 SettingsView(startGameFunction: startGame)
             }
-                
         }
     }
     
@@ -139,24 +124,39 @@ struct ContentView: View {
         currentQuestion = 1
         operand1 = Int.random(in:1...difficulty)
         operand2 = Int.random(in:1...difficulty)
-        nextQuestion()
         userScore = 0
+        nextQuestion()
         gameStarted = true
     }
     
-    func nextQuestion(){
+    func checkAnswer(){
         guard currentQuestion < numQuestions else {
             showingResultTitle = "Game Over"
             showingResultMessage = "You Got \(userScore) out of \(numQuestions) questions correct!"
             return
         }
-        if userAnswer == (operand1 * operand2){
+        if userAnswer == (correctAnswer){
             userScore += 1
             showingResultTitle = "Correct"
             showingResultMessage = "So Proud of You!"
         } else {
             showingResultTitle = "Incorrect"
             showingResultMessage = "The answer is \(operand1 * operand2)"
+        }
+    }
+    func nextQuestion(){
+        operand1 = Int.random(in: 2...difficulty)
+        operand2 = Int.random(in: 2...difficulty)
+        
+        possibleAnswers = []
+        possibleAnswers.append(correctAnswer)
+        for _ in 0..<3{
+            var randomAnswer: Int = 0
+            while true {
+                randomAnswer = (Int.random(in: 1...15) * Int.random(in: 1...15))
+                if !possibleAnswers.contains(randomAnswer){break}
+            }
+            possibleAnswers.append(randomAnswer)
         }
 
     }
