@@ -38,6 +38,8 @@ struct SettingsView: View{
     }
 }
 
+
+
 struct ContentView: View {
     @State private var currentQuestion: Int = 1
     @State private var difficulty: Int = 2
@@ -83,20 +85,24 @@ struct ContentView: View {
                                     .fontWeight(.bold)
                             }
                             .frame(maxWidth: .infinity, maxHeight: 100)
-                            .background(showingResult ? (correctAnswer == answer ? .green : .red) : .blue)                            .clipShape(.rect(cornerRadius: 10))
+                            .background(showingResult ? (correctAnswer == answer ? .green : (answer == userAnswer ? .red : .gray)) : .blue)                            .clipShape(.rect(cornerRadius: 10))
                             .foregroundColor(.white)
+                            .scaleEffect(answer == userAnswer || answer == correctAnswer ? 1 : scaleAmount)
                         }
                     }
                     Spacer()
                 }
                 .alert(showingResultTitle, isPresented: $showingResult){
                     Button(currentQuestion != numQuestions ? "Next Question" : "New Game"){
+                        
                         if currentQuestion == numQuestions{
                             gameStarted = false
                         } else {
                             currentQuestion += 1
                             nextQuestion()
-                            scaleAmount = 1
+                            withAnimation{
+                                scaleAmount = 1
+                            }
                         }
                         
                     }
