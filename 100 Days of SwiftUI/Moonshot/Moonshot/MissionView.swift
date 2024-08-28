@@ -59,6 +59,7 @@ struct CrewView: View {
 struct MissionView: View {
     let mission: Mission
     let crew: Array<CrewMember>
+
     init(mission: Mission, astronauts: [String: Astronaut]){
         self.mission = mission
         self.crew = mission.crew.map { member in
@@ -68,6 +69,7 @@ struct MissionView: View {
                 fatalError("Missing \(member.name)")
             }
         }
+
     }
     var body: some View {
         ScrollView{
@@ -99,12 +101,18 @@ struct MissionView: View {
         .navigationTitle(mission.displayName)
         .navigationBarTitleDisplayMode(.inline)
         .background(.darkBackground)
+        .toolbar{
+            Button("Home"){
+                
+            }
+        }
+
     }
 }
 
 #Preview {
     let missions: [Mission] = Bundle.main.decode("missions.json")
     let astronauts: [String: Astronaut] = Bundle.main.decode("astronauts.json")
-    return MissionView(mission: missions[1], astronauts: astronauts )
+    return MissionView(mission: missions[1], astronauts: astronauts)
         .preferredColorScheme(.dark)
 }

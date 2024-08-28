@@ -8,11 +8,11 @@
 import SwiftUI
 struct ContentView: View {
     @State private var isGrid: Bool = false
-
+    @State private var path = NavigationPath()
     var body: some View {
-        NavigationStack{
+        NavigationStack(path: $path){
             Group{
-                if isGrid { MoonshotGridView() } else { MoonshotListView() }
+                if isGrid { MoonshotGridView(path: $path) } else { MoonshotListView(path: $path) }
             }
                 .navigationTitle("Moonshot")
                 .background(.darkBackground)
@@ -32,13 +32,12 @@ struct ContentView: View {
 struct MoonshotListView: View {
     let astronauts: [String: Astronaut] = Bundle.main.decode("astronauts.json")
     let missions: [Mission] = Bundle.main.decode("missions.json")
+    @Binding var path: NavigationPath
     var body: some View {
         NavigationStack{
             List{
                 ForEach(missions){mission in
-                    NavigationLink{
-                        MissionView(mission: mission, astronauts: astronauts)
-                    } label: {
+                    NavigationLink(value: mission){
                         HStack(spacing: 30){
                             Image(mission.image)
                                 .resizable()
@@ -57,6 +56,10 @@ struct MoonshotListView: View {
                 .listRowBackground(Color.darkBackground)
             }
             .listStyle(.plain)
+            .navigationDestination(for: Mission.self){ mission in
+                MissionView(mission: mission, astronauts: astronauts)
+                
+            }
         }
     }
 }
@@ -66,14 +69,13 @@ struct MoonshotGridView: View {
     let columns = [
         GridItem(.adaptive(minimum: 150))
     ]
+    @Binding var path: NavigationPath
     var body: some View {
         NavigationStack{
             ScrollView{
                 LazyVGrid(columns: columns) {
                     ForEach(missions){mission in
-                        NavigationLink{
-                            MissionView(mission: mission, astronauts: astronauts)
-                        } label: {
+                        NavigationLink(value: mission){
                             VStack{
                                 Image(mission.image)
                                     .resizable()
@@ -103,6 +105,9 @@ struct MoonshotGridView: View {
                     }
                 }
                 .padding([.horizontal, .bottom])
+            }
+            .navigationDestination(for: Mission.self){ mission in
+                MissionView(mission: mission, astronauts: astronauts)
             }
         }
     }
