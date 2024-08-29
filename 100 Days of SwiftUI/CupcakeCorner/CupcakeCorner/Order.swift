@@ -26,7 +26,6 @@ class Order: Codable {
     static let types = ["Vanilla", "Chocolate", "Strawberry", "Rainbow"]
     var type = 0
     var quantity = 3
-    
     var specialRequestEnabled = false {
         didSet {
             if specialRequestEnabled == false {
@@ -37,7 +36,6 @@ class Order: Codable {
     }
     var extraFrosting = false
     var addSprinkles = false
-    
     var name: String
     var streetAddress: String
     var city: String
@@ -80,6 +78,7 @@ class Order: Codable {
         }
         return cost
     }
+    
     init(){
         self.name = UserDefaults.standard.string(forKey: "name") ?? ""
         self.streetAddress = UserDefaults.standard.string(forKey: "streetAddress") ?? ""

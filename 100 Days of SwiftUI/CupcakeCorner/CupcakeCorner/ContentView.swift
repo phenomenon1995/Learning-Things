@@ -15,7 +15,7 @@ struct ContentView: View {
         NavigationStack(path: $path){
             Form{
                 Section{
-                    Picker("Select your cake type", selection: $order.type){
+                    Picker("Select Your cake type", selection: $order.type){
                         ForEach(Order.types.indices, id: \.self){
                             Text(Order.types[$0])
                         }
@@ -31,12 +31,28 @@ struct ContentView: View {
                     }
                 }
                 Section{
-                    NavigationLink("Delivery Details"){
-                        AddressView(order: order, path: path)
+                    HStack{
+                        Button("Delivery Details"){
+                            path.append("AddressView")
+                        }
+                            .frame(maxWidth:.infinity)
+                            
                     }
                 }
             }
             .navigationTitle("Cupcake Corner")
+            .navigationDestination(for: String.self){selection in
+                switch selection {
+                case "AddressView":
+                    AddressView(order: order, path: $path)
+                case "CheckoutView":
+                    CheckoutView(order: order, path: $path)
+                case "HomeView":
+                    ContentView()
+                default:
+                    ContentView()
+                }
+            }   
         }
     }
 }

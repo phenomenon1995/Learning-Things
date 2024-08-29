@@ -9,11 +9,10 @@ import SwiftUI
 
 struct AddressView: View {
     @Bindable var order: Order
-    var path: NavigationPath
+    @Binding var path: NavigationPath
     var body: some View {
         
         Form {
-            
             Section {
                 TextField("Name", text: $order.name)
                 TextField("Street Address", text: $order.streetAddress)
@@ -21,27 +20,22 @@ struct AddressView: View {
                 TextField("Zip Code", text: $order.zip)
             }
             Section{
-                NavigationLink("Check out"){
-                    CheckoutView(order: order, path: path)
+                Button{
+                    path.append("CheckoutView")
+                } label: {
+                    Text("Checkout")
                 }
+                .frame(maxWidth: .infinity)
                 Toggle("Remember This Info", isOn: $order.saveInfo)
-                
             }
             .disabled(order.hasValidAddress)
             .toolbar{
-                ToolbarItem(placement: .cancellationAction){
-                    Button("Cancel Order"){
-                        
-                    }
+                Button("Cancel Order"){
+                    path = NavigationPath()
                 }
             }
         }
         .navigationTitle("Delivery details")
         .navigationBarTitleDisplayMode(.inline)
-        
     }
-}
-
-#Preview {
-    AddressView(order: Order(), path: NavigationPath())
 }

@@ -13,7 +13,7 @@ struct CheckoutView: View {
     @State private var showingConfirmation: Bool = false
     @State private var errorMessage = ""
     @State private var showingErrorMessage = false
-    var path: NavigationPath
+    @Binding var path: NavigationPath
     var body: some View {
         ScrollView{
             VStack{
@@ -39,24 +39,22 @@ struct CheckoutView: View {
         .navigationBarTitleDisplayMode(.inline)
         .scrollBounceBehavior(.basedOnSize)
         .alert("Thank You!", isPresented: $showingConfirmation){
+            Button("OK"){
+                path = NavigationPath()
+            }
         } message: {
             Text(confirmationMessage)
-            Button("OK"){
-                print(order.saveInfo)
-                order.saveUserDefaults()
-               
-            }
+            
         }
         .alert("Checkout Failed", isPresented: $showingErrorMessage){
-        } message: {
-            Text(errorMessage)
             Button{
-                print(order.saveInfo)
-                order.saveUserDefaults()
-                
+                path = NavigationPath()
             } label:{
                 Text("OK")
             }
+        } message: {
+            Text(errorMessage)
+            
         }
     }
     
@@ -86,6 +84,4 @@ struct CheckoutView: View {
         
     }
 }
-#Preview {
-    CheckoutView(order: Order(), path: NavigationPath())
-}
+
