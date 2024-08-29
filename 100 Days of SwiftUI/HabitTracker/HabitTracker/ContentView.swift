@@ -11,6 +11,10 @@ struct Activity: Codable, Identifiable, Equatable{
     let title: String
     let description: String
     var timesCompleted: Int
+    
+    static func == (lhs: Activity, rhs: Activity) -> Bool {
+        return lhs.id == rhs.id
+    }
 }
 
 @Observable
@@ -89,37 +93,18 @@ struct ActivityDetailView: View {
             Text(activity.description)
                 .font(.headline)
             Spacer()
-            Text("Times Completed: \(timesCompleted)")
-                .font(.title)
-         
-            HStack{
-                Button{
-                    timesCompleted += 1
-                    var new = activity
-                    let index = activities.activities.firstIndex(of: activity)
-                    print(index as Any)
-                    new.timesCompleted += 1
-                    activity.timesCompleted += 1
-                    activities.activities[index ?? 0 ] = new
-                    
-                    print("old \(activity.timesCompleted)")
-                    print("new \(new.timesCompleted)")
-                } label: {
-                    ZStack{
-                        LinearGradient(stops: [
-                            .init(color: .primary, location: 0.0),
-                            .init(color: .secondary, location: 0.90)], startPoint: .top, endPoint: .bottom)
-                        Text("COMPLETED")
-                            .font(.largeTitle)
-                            .bold()
-                            .foregroundStyle(.black)
-                            
-                    }
-                    .frame(width: 300, height:100)
-                    .clipShape(.rect(cornerRadius: 30))
+            
+            Stepper(value: $timesCompleted){
+                Text("Times Completed \(timesCompleted)")
+            }   onEditingChanged: { _ in
+                guard let index = activities.activities.firstIndex(of: activity) else {
+                    print("Activity ID not found")
+                    return
                 }
-                
+                activities.activities[index].timesCompleted = timesCompleted
+                print("in array \(activities.activities[index].timesCompleted)")
             }
+            
             Spacer()
                 .navigationTitle(activity.title)
             
