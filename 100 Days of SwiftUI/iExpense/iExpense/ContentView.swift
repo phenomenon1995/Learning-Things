@@ -5,85 +5,111 @@
 //  Created by David Williams on 8/25/24.
 //
 
+import SwiftData
 import SwiftUI
 
-struct ExpenseItem: Identifiable, Codable{
+@Model
+class ExpenseItem: Identifiable{
     var id = UUID()
     let name: String
     let type: String
     let amount: Double
+    static let types = ["Business", "Personal"]
+    init(id: UUID = UUID(), name: String, type: String, amount: Double) {
+        self.id = id
+        self.name = name
+        self.type = type
+        self.amount = amount
+    }
+   
 }
 
-@Observable
-class Expenses {
-    let types = ["Business", "Personal"]
-    var items: Array<ExpenseItem> = [ExpenseItem](){
-        didSet{
-            if let encoded = try? JSONEncoder().encode(items){
-                UserDefaults.standard.set(encoded, forKey: "items")
-            }
-        }
-    }
-    
-    init(){
-        if let savedItems = UserDefaults.standard.data(forKey: "items"){
-            if let decodedItems = try? JSONDecoder().decode([ExpenseItem].self,from: savedItems){
-                items = decodedItems
-                return
-            }
-        }
-        items = []
-    }
-}
 
 struct ContentView: View {
-    @State private var expenses: Expenses = Expenses()
-    @State private var showingAddExpense = false
-    @State private var textColor: Color = .black
-    
+    @Environment(\.modelContext) var modelContext
+    @State private var sortOrder = [SortDescriptor<ExpenseItem>]()
+    @State private var filter = ExpenseItem.types
     var body: some View{
-        NavigationStack{
-            List{
-                ForEach(expenses.types, id: \.self){type in
-                    Section(type){
-                        ForEach(expenses.items){item in
-                            if item.type == type {
-                                HStack {
-                                    VStack (alignment: .leading){
-                                        Text(item.name)
-                                            .font(.headline)
-                                        Text(item.type)
-                                    }
-                                    Spacer()
-                                    Text(item.amount, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
-                                }
-                                .foregroundStyle(item.amount < 9.99 ? .red :
-                                                    item.amount > 99.99 ? .green : .black)
+        NavigationStack(){
+            ExpensesView(filterBy: filter, sortBy: sortOrder)
+                .navigationTitle("iExpense")
+                .toolbar{
+                    ToolbarItem(placement: .topBarTrailing){
+                        NavigationLink{
+                            AddView()
+                        } label: {
+                            Image(systemName: "plus")
+                        }
+                    }
+                    ToolbarItem(placement: .topBarLeading){
+                        Button("Reset"){
+                            makeSample()
+                            filter = ExpenseItem.types
+                        }
+                    }
+                    ToolbarItem(placement:.secondaryAction){
+                        Picker("Sort By", selection: $sortOrder){
+                            Text("Name")
+                                .tag([
+                                    SortDescriptor(\ExpenseItem.name),
+                                    SortDescriptor(\ExpenseItem.type),
+                                    SortDescriptor(\ExpenseItem.amount)]
+                                )
+                            Text("Amount")
+                                .tag([
+                                    SortDescriptor(\ExpenseItem.amount),
+                                    SortDescriptor(\ExpenseItem.type),
+                                    SortDescriptor(\ExpenseItem.name)]
+                                )
+                        }
+                    }
+                    ToolbarItem(placement:.secondaryAction){
+                        Picker("Show", selection: $filter){
+                            Text("All")
+                                .tag(ExpenseItem.types)
+                            ForEach(ExpenseItem.types, id: \.self){type in
+                                Text(type)
+                                    .tag([type])
                             }
                         }
-                            
-                        .onDelete(perform: removeItems(at:))
                     }
                 }
-                
-            }
-            .navigationTitle("iExpense")
-            .toolbar{
-                NavigationLink{
-                    AddView(expenses: expenses)
-                } label: {
-                    Image(systemName: "plus")
-                }
-            }
-            
         }
     }
     
-    func removeItems(at offsets: IndexSet){
-        expenses.items.remove(atOffsets: offsets)
+   
+        
+    
+    func makeSample(){
+        var tempArray = [ExpenseItem]()
+        do{
+            try modelContext.delete(model: ExpenseItem.self)
+            let item1 = ExpenseItem(name: "Expense 1", type: "Personal", amount: 2.00)
+            let item2 = ExpenseItem(name: "Expense 2", type: "Personal", amount: 20.00)
+            let item3 = ExpenseItem(name: "Expense 3", type: "Personal", amount: 200.00)
+            let item4 = ExpenseItem(name: "Expense 4", type: "Business", amount: 6.00)
+            let item5 = ExpenseItem(name: "Expense 5", type: "Business", amount: 60.00)
+            let item6 = ExpenseItem(name: "Expense 6", type: "Business", amount: 600.00)
+            tempArray.append(item1)
+            tempArray.append(item2)
+            tempArray.append(item3)
+            tempArray.append(item4)
+            tempArray.append(item5)
+            tempArray.append(item6)
+            for expense in tempArray {
+                modelContext.insert(expense)
+            }
+        } catch {
+            print("WHOOPS")
+        }
+        
+        
     }
+    
+    
 }
 
 #Preview {
+    
     ContentView()
 }

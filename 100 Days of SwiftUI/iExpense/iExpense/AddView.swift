@@ -9,21 +9,17 @@ import SwiftUI
 
 struct AddView: View {
     @Environment(\.dismiss) var dismiss
-    
+    @Environment(\.modelContext) var modelContext
     @State private var name = "Add New Expense"
     @State private var type = "Personal"
     @State private var amount = 0.0
     
-    
-    var expenses: Expenses
-    
-    
     var body: some View {
         NavigationStack{
             Form{
-                //TextField("Name", text: $name)
+                TextField("Name", text: $name)
                 Picker("Type", selection: $type){
-                    ForEach(expenses.types, id: \.self){
+                    ForEach(ExpenseItem.types, id: \.self){
                         Text($0)
                     }
                 }
@@ -36,7 +32,7 @@ struct AddView: View {
                 ToolbarItem(placement: .confirmationAction){
                     Button("Save"){
                         let item = ExpenseItem(name: name, type: type, amount: amount)
-                        expenses.items.append(item)
+                        modelContext.insert(item)
                         dismiss()
                     }
                 }
@@ -53,5 +49,5 @@ struct AddView: View {
 }
 
 #Preview {
-    AddView(expenses: Expenses())
+    AddView()
 }
