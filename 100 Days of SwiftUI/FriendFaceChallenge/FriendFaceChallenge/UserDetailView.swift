@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+
 struct FriendIcon: View {
     let user: User
     var body: some View {
@@ -99,8 +100,11 @@ struct UserDetailView: View {
 
 #Preview {
     var allUsers = [User]()
-    let user1 = User(id: "123-asd", isActive: true, name: "Jod Gibbles", age: 43, company: "PlaceCorp", email: "shimp@placecorp.com", address: "1349 SOM Center Road, Mayfield Heights, Ohio, 44124", about: "This guy, is for sure a guy", registered: .now, tags: [String](), friends: [Friend(id: "1244-1255", name: "David J")])
-    let user2 = User(id: "1244-1255", isActive: true, name: "David J", age: 43, company: "PlaceCorp", email: "gimp@placecorp.com", address: "9874 SOM Center Road, Mayfield Heights, Ohio, 44124", about: "This guy, is for sure not a guy", registered: .now, tags: [String](), friends: [Friend(id: "123-asd", name: "David J")])
+    var user1 = User( id: "123456", isActive: true, name: "Jod Gibbles", age: 43, company: "PlaceCorp", email: "shimp@placecorp.com", address: "1349 SOM Center Road, Mayfield Heights, Ohio, 44124", about: "This guy, is for sure a guy", registered: .now, tags: [String](), friends: [Friend]())
+    var user2 = User(id: "78912346", isActive: true, name: "David J", age: 43, company: "PlaceCorp", email: "gimp@placecorp.com", address: "9874 SOM Center Road, Mayfield Heights, Ohio, 44124", about: "This guy, is for sure not a guy", registered: .now, tags: [String](), friends: [Friend]())
+    
+    user1.friends.append(Friend(id: user2.id, name: user2.name))
+    user2.friends.append(Friend(id:user1.id, name: user1.name))
     
     allUsers.append(user1)
     allUsers.append(user2)

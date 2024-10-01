@@ -4,7 +4,7 @@
 //
 //  Created by David Williams on 9/6/24.
 //
-
+import SwiftData
 import SwiftUI
 
 struct ActivityIcon: View {
@@ -23,12 +23,16 @@ struct ActivityIcon: View {
 
 
 struct AllUsersView: View {
-    @State private var allUsers = [User]()
+    @Environment(\.modelContext) var modelContext
+    @Query var allUsers : [User]
     @State private var filteredUsers = [User]()
     @State private var filterBy = "Active"
     @Binding var path: NavigationPath
     
+    
+    
     var body: some View {
+        Text("There are \(allUsers.count) users saved to Storage")
         List(allUsers){user in
             NavigationLink(value: user){
                 HStack{
@@ -50,6 +54,22 @@ struct AllUsersView: View {
         .task{
             await loadData()
         }
+        .toolbar{
+            Button{
+                allUsers.forEach{ user in
+                    modelContext.delete(user)
+                }
+            }label: {
+                Text("Erase Local Storage")
+            }
+            Button{
+                Task {
+                    await loadData()
+                }
+            } label: {
+                Text("Load Data")
+            }
+        }
     }
     
     func filterUsers(by: String){
@@ -62,21 +82,30 @@ struct AllUsersView: View {
             filteredUsers = allUsers
         }
     }
-    
+   
     func loadData() async {
         guard let url: URL = URL(string:"https://www.hackingwithswift.com/samples/friendface.json") else {
             print("invalid url")
             return
         }
+        guard allUsers.isEmpty else {
+            print("Users already in storage")
+            return
+        }
         do {
+            print("Loading Users from internet")
             let (data, _) = try await URLSession.shared.data(from: url)
             let decoder = JSONDecoder()
             decoder.dateDecodingStrategy = .iso8601
             if let decodedResponse = try? decoder.decode([User].self, from: data) {
-                allUsers = decodedResponse.sorted{
+                decodedResponse.sorted{
                     $1.name > $0.name
+                }.forEach{ user in
+                    modelContext.insert(user)
+                    print("Added User \(user.name) Id: \(user.id) to context")
+                    
                 }
-                
+        
             }
         } catch {
             print("invalid data")
